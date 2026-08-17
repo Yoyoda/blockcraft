@@ -8,10 +8,6 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "repository": {
-    "type": "git",
-    "url": "http://localhost:26831/Yoyoda/blockcraft"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

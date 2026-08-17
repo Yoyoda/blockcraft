@@ -61,9 +61,10 @@ export class Viewer3D {
   }
 
   rebuild() {
-    // Remove old meshes
+    // Remove old meshes and dispose materials
     for (const mesh of this.meshes.values()) {
       this.scene.remove(mesh);
+      mesh.material.dispose();
       mesh.dispose();
     }
     this.meshes.clear();
