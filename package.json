@@ -1,0 +1,25 @@
+{
+  "name": "blockcraft",
+  "version": "1.0.0",
+  "description": "A webapp to plan block-based structure.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://localhost:26831/Yoyoda/blockcraft"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^8.2.1"
+  },
+  "dependencies": {
+    "three": "^0.185.1"
+  },
+  "type": "module"
+}
