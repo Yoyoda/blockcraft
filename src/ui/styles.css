@@ -120,6 +120,7 @@ html, body {
 
 #editor-canvas {
   flex: 1;
+  min-height: 0;
   display: block;
   background: #111;
 }
@@ -132,6 +133,7 @@ html, body {
   padding: 6px;
   background: var(--bg-panel);
   border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 #layer-nav button {

@@ -21,7 +21,7 @@ export class EditorCanvas {
   }
 
   _resizeCanvas() {
-    const rect = this.canvas.parentElement.getBoundingClientRect();
+    const rect = this.canvas.getBoundingClientRect();
     this.canvas.width = rect.width;
     this.canvas.height = rect.height;
     // Center the grid
