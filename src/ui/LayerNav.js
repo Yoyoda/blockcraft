@@ -21,6 +21,8 @@ export function initLayerNav(container) {
       <button id="layer-move-right" title="Move layer +X">→</button>
       <button id="layer-move-up" title="Move layer +Y">↑</button>
       <button id="layer-move-down" title="Move layer -Y">↓</button>
+      <button id="layer-shift-up" title="Raise layer +Z (swaps with the level above)">Z▲</button>
+      <button id="layer-shift-down" title="Lower layer -Z (swaps with the level below)">Z▼</button>
     </div>
     <div class="layer-group">
       <span class="layer-group-label">Delete</span>
@@ -39,6 +41,8 @@ export function initLayerNav(container) {
   on('#layer-move-right', () => appState.moveLayer(1, 0));
   on('#layer-move-up', () => appState.moveLayer(0, 1));
   on('#layer-move-down', () => appState.moveLayer(0, -1));
+  on('#layer-shift-up', () => appState.shiftLayer(1));
+  on('#layer-shift-down', () => appState.shiftLayer(-1));
   on('#layer-clear', () => appState.clearLayer());
   on('#layer-remove', () => appState.removeLayer());
 

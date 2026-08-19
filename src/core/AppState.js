@@ -119,6 +119,27 @@ class AppState {
     this.notify();
   }
 
+  /** Swap the current layer with the level above (+1) or below (-1) and follow it. */
+  shiftLayer(direction) {
+    const dz = Math.sign(direction);
+    if (dz === 0) return;
+    const z0 = this.currentLayer;
+    const z1 = z0 + dz;
+    const from = this.structure.getLayer(z0);
+    const to = this.structure.getLayer(z1);
+    const changes = [];
+    for (const key of new Set([...from.keys(), ...to.keys()])) {
+      const [x, y] = key.split(',').map(Number);
+      changes.push({ x, y, z: z1, blockId: from.get(key) ?? null });
+      changes.push({ x, y, z: z0, blockId: to.get(key) ?? null });
+    }
+    if (changes.length > 0) {
+      this.history.execute(new BatchBlockCommand(this.structure, changes));
+    }
+    this.currentLayer = z1;
+    this.notify();
+  }
+
   /** Translate every block of the current layer by (dx, dy). */
   moveLayer(dx, dy) {
     if (dx === 0 && dy === 0) return;
