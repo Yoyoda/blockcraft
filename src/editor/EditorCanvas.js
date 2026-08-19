@@ -4,9 +4,11 @@ import { appState } from '../core/AppState.js';
  * 2D layer editor rendered on a canvas.
  */
 export class EditorCanvas {
-  constructor(canvas) {
+  constructor(canvas, { cursorLabel = null } = {}) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
+    this.cursorLabel = cursorLabel;
+    this.cursorCell = null;
     this.cellSize = 24;
     this.offsetX = 0;
     this.offsetY = 0;
@@ -16,8 +18,12 @@ export class EditorCanvas {
 
     this._resizeCanvas();
     this._bindEvents();
-    appState.onChange(() => this.render());
+    appState.onChange(() => {
+      this.render();
+      this._updateCursorLabel();
+    });
     this.render();
+    this._updateCursorLabel();
   }
 
   _resizeCanvas() {
@@ -49,6 +55,8 @@ export class EditorCanvas {
     });
 
     this.canvas.addEventListener('mousemove', (e) => {
+      this.cursorCell = this._screenToGrid(e.clientX, e.clientY);
+      this._updateCursorLabel();
       if (this.isPanning) {
         this.offsetX += e.clientX - this.lastPan.x;
         this.offsetY += e.clientY - this.lastPan.y;
@@ -60,6 +68,11 @@ export class EditorCanvas {
       }
     });
 
+    this.canvas.addEventListener('mouseleave', () => {
+      this.cursorCell = null;
+      this._updateCursorLabel();
+    });
+
     this.canvas.addEventListener('mouseup', () => {
       this.isPanning = false;
       this.isDrawing = false;
@@ -67,12 +80,24 @@ export class EditorCanvas {
 
     this.canvas.addEventListener('wheel', (e) => {
       e.preventDefault();
+      if (e.ctrlKey) {
+        appState.setLayer(appState.currentLayer + (e.deltaY < 0 ? 1 : -1));
+        return;
+      }
       const zoom = e.deltaY < 0 ? 1.1 : 0.9;
       this.cellSize = Math.max(8, Math.min(64, Math.round(this.cellSize * zoom)));
       this.render();
-    });
+    }, { passive: false });
 
     this.canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  _updateCursorLabel() {
+    if (!this.cursorLabel) return;
+    const z = appState.currentLayer;
+    this.cursorLabel.textContent = this.cursorCell
+      ? `X ${this.cursorCell.x}   Y ${this.cursorCell.y}   Z ${z}`
+      : `X –   Y –   Z ${z}`;
   }
 
   _screenToGrid(clientX, clientY) {

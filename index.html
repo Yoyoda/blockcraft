@@ -12,11 +12,15 @@
     <main id="workspace">
       <aside id="palette-panel"></aside>
       <section id="editor-panel">
-        <canvas id="editor-canvas"></canvas>
+        <div id="editor-stage">
+          <canvas id="editor-canvas"></canvas>
+          <div id="editor-cursor"></div>
+        </div>
         <div id="layer-nav"></div>
       </section>
       <section id="viewer-panel">
         <canvas id="viewer-canvas"></canvas>
+        <div id="layer-range"></div>
       </section>
     </main>
   </div>

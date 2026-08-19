@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { appState } from '../core/AppState.js';
+import { Structure } from '../core/Structure.js';
 
 /**
  * 3D viewer using Three.js with instanced meshes.
@@ -71,10 +72,15 @@ export class Viewer3D {
 
     const structure = appState.structure;
     const library = appState.library;
+    const range = appState.layerRange;
 
     // Group blocks by type
     const groups = new Map();
     for (const [key, blockId] of structure.blocks) {
+      if (range) {
+        const { z } = Structure.parseKey(key);
+        if (z < range.min || z > range.max) continue;
+      }
       if (!groups.has(blockId)) groups.set(blockId, []);
       groups.get(blockId).push(key);
     }
@@ -88,7 +94,7 @@ export class Viewer3D {
 
       const matrix = new THREE.Matrix4();
       keys.forEach((key, i) => {
-        const { x, y, z } = appState.structure.constructor.parseKey(key);
+        const { x, y, z } = Structure.parseKey(key);
         matrix.setPosition(x, y, z);
         mesh.setMatrixAt(i, matrix);
       });

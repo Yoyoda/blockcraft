@@ -13,6 +13,8 @@ class AppState {
     this.currentLayer = 0;
     this.selectedBlockId = 'stone';
     this.currentTool = 'pencil';
+    // Z range displayed in the 3D viewer; null means "show everything"
+    this.layerRange = null;
     this.listeners = new Set();
   }
 
@@ -27,6 +29,11 @@ class AppState {
 
   setLayer(z) {
     this.currentLayer = z;
+    this.notify();
+  }
+
+  setLayerRange(min, max) {
+    this.layerRange = { min: Math.min(min, max), max: Math.max(min, max) };
     this.notify();
   }
 
@@ -65,10 +72,84 @@ class AppState {
     this.notify();
   }
 
+  /** Duplicate the current layer one level up (+1) or down (-1) and follow it. */
+  copyLayer(direction) {
+    const targetZ = this.currentLayer + direction;
+    const source = this.structure.getLayer(this.currentLayer);
+    const target = this.structure.getLayer(targetZ);
+    if (source.size === 0 && target.size === 0) {
+      this.setLayer(targetZ);
+      return;
+    }
+    const cells = new Map();
+    for (const key of target.keys()) cells.set(key, null);
+    for (const [key, blockId] of source) cells.set(key, blockId);
+    this._applyCells(cells, targetZ);
+    this.currentLayer = targetZ;
+    this.notify();
+  }
+
+  /** Translate every block of the current layer by (dx, dy). */
+  moveLayer(dx, dy) {
+    if (dx === 0 && dy === 0) return;
+    const source = this.structure.getLayer(this.currentLayer);
+    if (source.size === 0) return;
+    const cells = new Map();
+    for (const key of source.keys()) cells.set(key, null);
+    for (const [key, blockId] of source) {
+      const [x, y] = key.split(',').map(Number);
+      cells.set(`${x + dx},${y + dy}`, blockId);
+    }
+    this._applyCells(cells, this.currentLayer);
+    this.notify();
+  }
+
+  /** Remove every block of the current layer, leaving the level in place. */
+  clearLayer() {
+    const source = this.structure.getLayer(this.currentLayer);
+    if (source.size === 0) return;
+    const cells = new Map();
+    for (const key of source.keys()) cells.set(key, null);
+    this._applyCells(cells, this.currentLayer);
+    this.notify();
+  }
+
+  /** Delete the current level entirely: every layer above shifts one step down. */
+  removeLayer() {
+    const z0 = this.currentLayer;
+    const zMax = Math.max(this.structure.getZRange().max, z0);
+    const changes = [];
+    for (let z = z0; z <= zMax; z++) {
+      const above = this.structure.getLayer(z + 1);
+      const cells = new Map();
+      for (const key of this.structure.getLayer(z).keys()) cells.set(key, null);
+      for (const [key, blockId] of above) cells.set(key, blockId);
+      for (const [key, blockId] of cells) {
+        const [x, y] = key.split(',').map(Number);
+        changes.push({ x, y, z, blockId });
+      }
+    }
+    if (changes.length === 0) return;
+    this.history.execute(new BatchBlockCommand(this.structure, changes));
+    this.notify();
+  }
+
+  /** cells: Map of "x,y" -> blockId|null, applied as one undoable batch. */
+  _applyCells(cells, z) {
+    const changes = [];
+    for (const [key, blockId] of cells) {
+      const [x, y] = key.split(',').map(Number);
+      changes.push({ x, y, z, blockId });
+    }
+    if (changes.length === 0) return;
+    this.history.execute(new BatchBlockCommand(this.structure, changes));
+  }
+
   loadStructure(structure) {
     this.structure = structure;
     this.history.clear();
     this.currentLayer = 0;
+    this.layerRange = null;
     this.notify();
   }
 }
