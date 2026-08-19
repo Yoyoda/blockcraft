@@ -161,6 +161,13 @@ class AppState {
     this.layerRange = null;
     this.notify();
   }
+
+  renameStructure(name) {
+    const trimmed = name.trim();
+    if (!trimmed || trimmed === this.structure.name) return;
+    this.structure.name = trimmed;
+    this.notify();
+  }
 }
 
 export const appState = new AppState();

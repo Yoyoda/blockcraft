@@ -19,7 +19,7 @@ export function initToolbar(container) {
       <button id="btn-redo" title="Redo (Ctrl+Y)">↪️ Redo</button>
     </div>
     <div class="toolbar-group">
-      <span id="structure-name" class="structure-name">${appState.structure.name}</span>
+      <input id="structure-name" class="structure-name" type="text" value="${appState.structure.name}" title="Structure name" />
     </div>
   `;
 
@@ -78,6 +78,15 @@ export function initToolbar(container) {
     input.click();
   });
 
+  const nameInput = container.querySelector('#structure-name');
+  nameInput.addEventListener('change', () => {
+    appState.renameStructure(nameInput.value);
+    nameInput.value = appState.structure.name;
+  });
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') nameInput.blur();
+  });
+
   container.querySelector('#btn-undo').addEventListener('click', () => {
     appState.history.undo();
     appState.notify();
@@ -96,6 +105,6 @@ export function initToolbar(container) {
 
   // Update name display
   appState.onChange(() => {
-    container.querySelector('#structure-name').textContent = appState.structure.name;
+    if (document.activeElement !== nameInput) nameInput.value = appState.structure.name;
   });
 }
