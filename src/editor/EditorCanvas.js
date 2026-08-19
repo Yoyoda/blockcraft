@@ -105,7 +105,8 @@ export class EditorCanvas {
     const sx = clientX - rect.left;
     const sy = clientY - rect.top;
     const gx = Math.floor((sx - this.offsetX) / this.cellSize);
-    const gy = Math.floor((sy - this.offsetY) / this.cellSize);
+    // Y grows upwards on screen to match the viewer's right-handed frame.
+    const gy = Math.floor((this.offsetY - sy) / this.cellSize);
     return { x: gx, y: gy };
   }
 
@@ -161,7 +162,7 @@ export class EditorCanvas {
       const [x, y] = key.split(',').map(Number);
       const block = library.get(blockId);
       const sx = offsetX + x * cellSize;
-      const sy = offsetY + y * cellSize;
+      const sy = offsetY - (y + 1) * cellSize;
       ctx.fillStyle = block ? block.color : '#FF00FF';
       ctx.fillRect(sx, sy, cellSize - 1, cellSize - 1);
     }

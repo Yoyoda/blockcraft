@@ -72,20 +72,25 @@ class AppState {
     this.notify();
   }
 
-  /** Duplicate the current layer one level up (+1) or down (-1) and follow it. */
+  /** Insert a copy of the current layer one level up (+1) or down (-1) and follow it. */
   copyLayer(direction) {
-    const targetZ = this.currentLayer + direction;
-    const source = this.structure.getLayer(this.currentLayer);
-    const target = this.structure.getLayer(targetZ);
-    if (source.size === 0 && target.size === 0) {
-      this.setLayer(targetZ);
-      return;
+    const z0 = this.currentLayer;
+    const range = this.structure.getZRange();
+    const changes = [];
+    if (direction > 0) {
+      // Shift everything above up by one; the freed level receives the copy.
+      for (let z = Math.max(range.max, z0) + 1; z > z0; z--) {
+        this._collectLayerCopy(changes, z, z - 1);
+      }
+    } else {
+      for (let z = Math.min(range.min, z0) - 1; z < z0; z++) {
+        this._collectLayerCopy(changes, z, z + 1);
+      }
     }
-    const cells = new Map();
-    for (const key of target.keys()) cells.set(key, null);
-    for (const [key, blockId] of source) cells.set(key, blockId);
-    this._applyCells(cells, targetZ);
-    this.currentLayer = targetZ;
+    if (changes.length > 0) {
+      this.history.execute(new BatchBlockCommand(this.structure, changes));
+    }
+    this.currentLayer = z0 + Math.sign(direction);
     this.notify();
   }
 
@@ -120,18 +125,22 @@ class AppState {
     const zMax = Math.max(this.structure.getZRange().max, z0);
     const changes = [];
     for (let z = z0; z <= zMax; z++) {
-      const above = this.structure.getLayer(z + 1);
-      const cells = new Map();
-      for (const key of this.structure.getLayer(z).keys()) cells.set(key, null);
-      for (const [key, blockId] of above) cells.set(key, blockId);
-      for (const [key, blockId] of cells) {
-        const [x, y] = key.split(',').map(Number);
-        changes.push({ x, y, z, blockId });
-      }
+      this._collectLayerCopy(changes, z, z + 1);
     }
     if (changes.length === 0) return;
     this.history.execute(new BatchBlockCommand(this.structure, changes));
     this.notify();
+  }
+
+  /** Queue the changes making level targetZ an exact copy of level sourceZ. */
+  _collectLayerCopy(changes, targetZ, sourceZ) {
+    const cells = new Map();
+    for (const key of this.structure.getLayer(targetZ).keys()) cells.set(key, null);
+    for (const [key, blockId] of this.structure.getLayer(sourceZ)) cells.set(key, blockId);
+    for (const [key, blockId] of cells) {
+      const [x, y] = key.split(',').map(Number);
+      changes.push({ x, y, z: targetZ, blockId });
+    }
   }
 
   /** cells: Map of "x,y" -> blockId|null, applied as one undoable batch. */

@@ -12,15 +12,15 @@ export function initLayerNav(container) {
     </div>
     <div class="layer-group">
       <span class="layer-group-label">Copy</span>
-      <button id="layer-copy-up" title="Copy this layer above (Z+1)">⧉▲</button>
-      <button id="layer-copy-down" title="Copy this layer below (Z-1)">⧉▼</button>
+      <button id="layer-copy-up" title="Insert a copy above (layers above shift up)">⧉▲</button>
+      <button id="layer-copy-down" title="Insert a copy below (layers below shift down)">⧉▼</button>
     </div>
     <div class="layer-group">
       <span class="layer-group-label">Move</span>
       <button id="layer-move-left" title="Move layer -X">←</button>
       <button id="layer-move-right" title="Move layer +X">→</button>
-      <button id="layer-move-up" title="Move layer -Y">↑</button>
-      <button id="layer-move-down" title="Move layer +Y">↓</button>
+      <button id="layer-move-up" title="Move layer +Y">↑</button>
+      <button id="layer-move-down" title="Move layer -Y">↓</button>
     </div>
     <div class="layer-group">
       <span class="layer-group-label">Delete</span>
@@ -37,8 +37,8 @@ export function initLayerNav(container) {
   on('#layer-copy-down', () => appState.copyLayer(-1));
   on('#layer-move-left', () => appState.moveLayer(-1, 0));
   on('#layer-move-right', () => appState.moveLayer(1, 0));
-  on('#layer-move-up', () => appState.moveLayer(0, -1));
-  on('#layer-move-down', () => appState.moveLayer(0, 1));
+  on('#layer-move-up', () => appState.moveLayer(0, 1));
+  on('#layer-move-down', () => appState.moveLayer(0, -1));
   on('#layer-clear', () => appState.clearLayer());
   on('#layer-remove', () => appState.removeLayer());
 
