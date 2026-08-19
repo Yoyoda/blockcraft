@@ -1,0 +1,48 @@
+/**
+ * Default Minecraft-inspired block library.
+ * Each block: { id, name, color, category }
+ */
+const MINECRAFT_BLOCKS = [
+  { id: 'stone', name: 'Stone', color: '#7F7F7F', category: 'natural' },
+  { id: 'cobblestone', name: 'Cobblestone', color: '#6B6B6B', category: 'natural' },
+  { id: 'dirt', name: 'Dirt', color: '#8B5E3C', category: 'natural' },
+  { id: 'grass', name: 'Grass', color: '#5D8C32', category: 'natural' },
+  { id: 'sand', name: 'Sand', color: '#E3D6A1', category: 'natural' },
+  { id: 'gravel', name: 'Gravel', color: '#848484', category: 'natural' },
+  { id: 'oak_log', name: 'Oak Log', color: '#6B5130', category: 'wood' },
+  { id: 'oak_planks', name: 'Oak Planks', color: '#BC9451', category: 'wood' },
+  { id: 'birch_log', name: 'Birch Log', color: '#D5C9A3', category: 'wood' },
+  { id: 'birch_planks', name: 'Birch Planks', color: '#C8B77A', category: 'wood' },
+  { id: 'spruce_log', name: 'Spruce Log', color: '#3D2A13', category: 'wood' },
+  { id: 'spruce_planks', name: 'Spruce Planks', color: '#6B5030', category: 'wood' },
+  { id: 'glass', name: 'Glass', color: '#C0E8F8', category: 'decoration' },
+  { id: 'brick', name: 'Brick', color: '#9B4A2C', category: 'building' },
+  { id: 'stone_brick', name: 'Stone Brick', color: '#6D6D6D', category: 'building' },
+  { id: 'obsidian', name: 'Obsidian', color: '#1B0B2E', category: 'natural' },
+  { id: 'iron_block', name: 'Iron Block', color: '#D8D8D8', category: 'mineral' },
+  { id: 'gold_block', name: 'Gold Block', color: '#FCDB4A', category: 'mineral' },
+  { id: 'diamond_block', name: 'Diamond Block', color: '#5DECF5', category: 'mineral' },
+  { id: 'coal_ore', name: 'Coal Ore', color: '#4A4A4A', category: 'mineral' },
+  { id: 'iron_ore', name: 'Iron Ore', color: '#8A7764', category: 'mineral' },
+  { id: 'gold_ore', name: 'Gold Ore', color: '#8A7550', category: 'mineral' },
+  { id: 'diamond_ore', name: 'Diamond Ore', color: '#5AACB8', category: 'mineral' },
+  { id: 'wool_white', name: 'White Wool', color: '#E8E8E8', category: 'wool' },
+  { id: 'wool_red', name: 'Red Wool', color: '#A02722', category: 'wool' },
+  { id: 'wool_blue', name: 'Blue Wool', color: '#2D3CA0', category: 'wool' },
+  { id: 'wool_green', name: 'Green Wool', color: '#3A5D1E', category: 'wool' },
+  { id: 'wool_yellow', name: 'Yellow Wool', color: '#C2A71E', category: 'wool' },
+  { id: 'wool_black', name: 'Black Wool', color: '#1D1D21', category: 'wool' },
+  { id: 'wool_orange', name: 'Orange Wool', color: '#D87F33', category: 'wool' },
+  { id: 'wool_purple', name: 'Purple Wool', color: '#7B2FBE', category: 'wool' },
+  { id: 'wool_pink', name: 'Pink Wool', color: '#D8729B', category: 'wool' },
+  { id: 'water', name: 'Water', color: '#3F76E4', category: 'natural' },
+  { id: 'lava', name: 'Lava', color: '#CF5B10', category: 'natural' },
+  { id: 'bedrock', name: 'Bedrock', color: '#3C3C3C', category: 'natural' },
+  { id: 'snow', name: 'Snow', color: '#F0FAFA', category: 'natural' },
+  { id: 'ice', name: 'Ice', color: '#91D4F7', category: 'natural' },
+  { id: 'clay', name: 'Clay', color: '#9EA4B0', category: 'natural' },
+  { id: 'netherrack', name: 'Netherrack', color: '#6F2020', category: 'nether' },
+  { id: 'glowstone', name: 'Glowstone', color: '#E9C86D', category: 'nether' },
+];
+
+export default MINECRAFT_BLOCKS;
