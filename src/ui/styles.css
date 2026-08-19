@@ -99,11 +99,51 @@ html, body {
   margin-bottom: 8px;
 }
 
+#palette-panel h3 + h3,
+.palette-category + h3 {
+  margin-top: 12px;
+}
+
 #palette-panel h4 {
   font-size: 11px;
   text-transform: uppercase;
   color: #888;
   margin: 8px 0 4px;
+}
+
+.palette-tools {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.palette-tool {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  background: var(--bg-toolbar);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  text-align: left;
+}
+
+.palette-tool:hover {
+  border-color: var(--accent);
+}
+
+.palette-tool.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 4px var(--accent);
+}
+
+.palette-tool-icon {
+  font-size: 14px;
+  width: 16px;
+  text-align: center;
 }
 
 .palette-blocks {

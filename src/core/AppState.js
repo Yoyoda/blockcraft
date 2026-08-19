@@ -1,6 +1,15 @@
 import { Structure } from './Structure.js';
 import { defaultLibrary } from '../library/BlockLibrary.js';
 import { HistoryManager, SetBlockCommand, BatchBlockCommand } from './HistoryManager.js';
+import { rectCells, sphereCells, lineCells } from './shapes.js';
+
+/** Drawing tools. A tool decides *how* cells are picked; the material decides *what* is placed. */
+export const TOOLS = {
+  PENCIL: 'pencil',
+  LINE: 'line',
+  RECT: 'rect',
+  SPHERE: 'sphere',
+};
 
 /**
  * Central application state.
@@ -11,8 +20,8 @@ class AppState {
     this.library = defaultLibrary;
     this.history = new HistoryManager();
     this.currentLayer = 0;
-    this.selectedBlockId = 'stone';
-    this.currentTool = 'pencil';
+    this.selectedMaterialId = 'stone';
+    this.currentTool = TOOLS.PENCIL;
     // Z range displayed in the 3D viewer; null means "show everything"
     this.layerRange = null;
     this.listeners = new Set();
@@ -37,8 +46,8 @@ class AppState {
     this.notify();
   }
 
-  selectBlock(blockId) {
-    this.selectedBlockId = blockId;
+  selectMaterial(materialId) {
+    this.selectedMaterialId = materialId;
     this.notify();
   }
 
@@ -49,7 +58,7 @@ class AppState {
 
   placeBlock(x, y) {
     const cmd = new SetBlockCommand(
-      this.structure, x, y, this.currentLayer, this.selectedBlockId
+      this.structure, x, y, this.currentLayer, this.selectedMaterialId
     );
     this.history.execute(cmd);
     this.notify();
@@ -63,12 +72,28 @@ class AppState {
     this.notify();
   }
 
-  placeBlocks(positions) {
-    const changes = positions.map(([x, y]) => ({
-      x, y, z: this.currentLayer, blockId: this.selectedBlockId,
-    }));
-    const cmd = new BatchBlockCommand(this.structure, changes);
-    this.history.execute(cmd);
+  /** Trace a straight line between two cells of the current layer. */
+  drawLine(a, b, { erase = false } = {}) {
+    this.applyShape(lineCells(a, b, this.currentLayer), { erase });
+  }
+
+  /** Fill the rectangle spanning corners a and b on the current layer. */
+  drawRect(a, b, { erase = false } = {}) {
+    this.applyShape(rectCells(a, b, this.currentLayer), { erase });
+  }
+
+  /** Build a sphere whose widest section sits on the current layer. */
+  drawSphere(center, radius, { erase = false } = {}) {
+    const origin = { x: center.x, y: center.y, z: this.currentLayer };
+    this.applyShape(sphereCells(origin, radius), { erase });
+  }
+
+  /** Apply a list of { x, y, z } cells as one undoable batch. */
+  applyShape(cells, { erase = false } = {}) {
+    if (cells.length === 0) return;
+    const blockId = erase ? null : this.selectedMaterialId;
+    const changes = cells.map(({ x, y, z }) => ({ x, y, z, blockId }));
+    this.history.execute(new BatchBlockCommand(this.structure, changes));
     this.notify();
   }
 
@@ -105,7 +130,7 @@ class AppState {
       const [x, y] = key.split(',').map(Number);
       cells.set(`${x + dx},${y + dy}`, blockId);
     }
-    this._applyCells(cells, this.currentLayer);
+    this._applyLayerCells(cells, this.currentLayer);
     this.notify();
   }
 
@@ -115,7 +140,7 @@ class AppState {
     if (source.size === 0) return;
     const cells = new Map();
     for (const key of source.keys()) cells.set(key, null);
-    this._applyCells(cells, this.currentLayer);
+    this._applyLayerCells(cells, this.currentLayer);
     this.notify();
   }
 
@@ -144,7 +169,7 @@ class AppState {
   }
 
   /** cells: Map of "x,y" -> blockId|null, applied as one undoable batch. */
-  _applyCells(cells, z) {
+  _applyLayerCells(cells, z) {
     const changes = [];
     for (const [key, blockId] of cells) {
       const [x, y] = key.split(',').map(Number);

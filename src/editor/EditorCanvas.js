@@ -1,4 +1,5 @@
-import { appState } from '../core/AppState.js';
+import { appState, TOOLS } from '../core/AppState.js';
+import { rectCells, sphereCells, lineCells, radiusBetween } from '../core/shapes.js';
 
 /**
  * 2D layer editor rendered on a canvas.
@@ -14,6 +15,8 @@ export class EditorCanvas {
     this.offsetY = 0;
     this.isPanning = false;
     this.isDrawing = false;
+    // Shape tools drag from an anchor cell to the cursor before being committed.
+    this.shapeDrag = null;
     this.lastPan = { x: 0, y: 0 };
 
     this._resizeCanvas();
@@ -45,22 +48,31 @@ export class EditorCanvas {
       if (e.button === 1 || (e.button === 0 && e.altKey)) {
         this.isPanning = true;
         this.lastPan = { x: e.clientX, y: e.clientY };
-      } else if (e.button === 0) {
+        return;
+      }
+      if (e.button !== 0 && e.button !== 2) return;
+      const erase = e.button === 2;
+      if (appState.currentTool === TOOLS.PENCIL) {
         this.isDrawing = true;
-        this._handleDraw(e);
-      } else if (e.button === 2) {
-        this.isDrawing = true;
-        this._handleErase(e);
+        if (erase) this._handleErase(e);
+        else this._handleDraw(e);
+      } else {
+        const anchor = this._screenToGrid(e.clientX, e.clientY);
+        this.shapeDrag = { anchor, current: anchor, erase };
+        this.render();
       }
     });
 
     this.canvas.addEventListener('mousemove', (e) => {
       this.cursorCell = this._screenToGrid(e.clientX, e.clientY);
+      if (this.shapeDrag) this.shapeDrag.current = this.cursorCell;
       this._updateCursorLabel();
       if (this.isPanning) {
         this.offsetX += e.clientX - this.lastPan.x;
         this.offsetY += e.clientY - this.lastPan.y;
         this.lastPan = { x: e.clientX, y: e.clientY };
+        this.render();
+      } else if (this.shapeDrag) {
         this.render();
       } else if (this.isDrawing) {
         if (e.buttons === 1 && !e.altKey) this._handleDraw(e);
@@ -73,9 +85,17 @@ export class EditorCanvas {
       this._updateCursorLabel();
     });
 
-    this.canvas.addEventListener('mouseup', () => {
+    window.addEventListener('mouseup', () => {
       this.isPanning = false;
       this.isDrawing = false;
+      this._commitShape();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && this.shapeDrag) {
+        this.shapeDrag = null;
+        this.render();
+      }
     });
 
     this.canvas.addEventListener('wheel', (e) => {
@@ -95,9 +115,61 @@ export class EditorCanvas {
   _updateCursorLabel() {
     if (!this.cursorLabel) return;
     const z = appState.currentLayer;
-    this.cursorLabel.textContent = this.cursorCell
+    const pos = this.cursorCell
       ? `X ${this.cursorCell.x}   Y ${this.cursorCell.y}   Z ${z}`
       : `X –   Y –   Z ${z}`;
+    this.cursorLabel.textContent = pos + this._shapeHint();
+  }
+
+  _shapeHint() {
+    const drag = this.shapeDrag;
+    if (!drag) return '';
+    const { anchor, current } = drag;
+    switch (appState.currentTool) {
+      case TOOLS.LINE:
+        return `   ╱ ${lineCells(anchor, current, 0).length}`;
+      case TOOLS.RECT: {
+        const w = Math.abs(current.x - anchor.x) + 1;
+        const h = Math.abs(current.y - anchor.y) + 1;
+        return `   ▭ ${w}×${h}`;
+      }
+      default:
+        return `   ⬤ r ${radiusBetween(anchor, current)}`;
+    }
+  }
+
+  /** Cells the in-progress shape would fill, restricted to the current layer. */
+  _previewCells() {
+    const drag = this.shapeDrag;
+    if (!drag) return [];
+    const z = appState.currentLayer;
+    switch (appState.currentTool) {
+      case TOOLS.LINE:
+        return lineCells(drag.anchor, drag.current, z);
+      case TOOLS.RECT:
+        return rectCells(drag.anchor, drag.current, z);
+      default: {
+        const center = { x: drag.anchor.x, y: drag.anchor.y, z };
+        return sphereCells(center, radiusBetween(drag.anchor, drag.current)).filter(c => c.z === z);
+      }
+    }
+  }
+
+  _commitShape() {
+    const drag = this.shapeDrag;
+    if (!drag) return;
+    this.shapeDrag = null;
+    const { anchor, current, erase } = drag;
+    switch (appState.currentTool) {
+      case TOOLS.LINE:
+        appState.drawLine(anchor, current, { erase });
+        break;
+      case TOOLS.RECT:
+        appState.drawRect(anchor, current, { erase });
+        break;
+      default:
+        appState.drawSphere(anchor, radiusBetween(anchor, current), { erase });
+    }
   }
 
   _screenToGrid(clientX, clientY) {
@@ -166,5 +238,26 @@ export class EditorCanvas {
       ctx.fillStyle = block ? block.color : '#FF00FF';
       ctx.fillRect(sx, sy, cellSize - 1, cellSize - 1);
     }
+
+    this._renderShapePreview();
+  }
+
+  _renderShapePreview() {
+    const cells = this._previewCells();
+    if (cells.length === 0) return;
+    const { ctx, cellSize, offsetX, offsetY } = this;
+    const material = appState.library.get(appState.selectedMaterialId);
+    ctx.save();
+    ctx.globalAlpha = 0.55;
+    ctx.fillStyle = this.shapeDrag.erase ? '#000' : (material ? material.color : '#FF00FF');
+    ctx.strokeStyle = this.shapeDrag.erase ? '#e94560' : '#fff';
+    ctx.lineWidth = 1;
+    for (const { x, y } of cells) {
+      const sx = offsetX + x * cellSize;
+      const sy = offsetY - (y + 1) * cellSize;
+      ctx.fillRect(sx, sy, cellSize - 1, cellSize - 1);
+      ctx.strokeRect(sx + 0.5, sy + 0.5, cellSize - 2, cellSize - 2);
+    }
+    ctx.restore();
   }
 }
