@@ -15,4 +15,6 @@ initLayerRange(document.getElementById('layer-range'));
 new EditorCanvas(document.getElementById('editor-canvas'), {
   cursorLabel: document.getElementById('editor-cursor'),
 });
-new Viewer3D(document.getElementById('viewer-canvas'));
+new Viewer3D(document.getElementById('viewer-canvas'), {
+  axesToggle: document.getElementById('viewer-axes-toggle'),
+});
