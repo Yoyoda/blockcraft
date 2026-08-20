@@ -34,16 +34,19 @@ export class Viewer3D {
     this.scene.background = new THREE.Color(0x1a1a2e);
     this.showOriginAxes = true;
     this.originAxes = null;
+    this.showGrid = false;
+    this.gridLines = null;
 
     this._setupCamera();
     this._setupRenderer();
     this._setupLights();
     this._setupControls();
     this._setupGizmo();
-    this._setupAxesToggle(axesToggle);
+    this._setupViewToggles(axesToggle);
 
     this.meshes = new Map(); // blockId -> InstancedMesh
     this.geometry = new THREE.BoxGeometry(1, 1, 1);
+    this.edgesGeometry = new THREE.EdgesGeometry(this.geometry);
 
     appState.onChange(() => this.rebuild());
     this.rebuild();
@@ -107,17 +110,25 @@ export class Viewer3D {
     }
   }
 
-  _setupAxesToggle(container) {
+  _setupViewToggles(container) {
     if (!container) return;
     container.innerHTML = `
       <label class="axes-toggle-label">
         <input type="checkbox" id="toggle-origin-axes" ${this.showOriginAxes ? 'checked' : ''} />
         Axes
       </label>
+      <label class="axes-toggle-label">
+        <input type="checkbox" id="toggle-grid" ${this.showGrid ? 'checked' : ''} />
+        Grid
+      </label>
     `;
     container.querySelector('#toggle-origin-axes').addEventListener('change', (e) => {
       this.showOriginAxes = e.target.checked;
       if (this.originAxes) this.originAxes.visible = this.showOriginAxes;
+    });
+    container.querySelector('#toggle-grid').addEventListener('change', (e) => {
+      this.showGrid = e.target.checked;
+      if (this.gridLines) this.gridLines.visible = this.showGrid;
     });
   }
 
@@ -164,6 +175,7 @@ export class Viewer3D {
     }
 
     this._updateOriginAxes();
+    this._updateGrid();
   }
 
   /** Colored X/Y/Z lines through the world origin, sized to fit the structure. */
@@ -203,6 +215,47 @@ export class Viewer3D {
     group.visible = this.showOriginAxes;
     this.originAxes = group;
     this.scene.add(group);
+  }
+
+  /** Wireframe edges for every visible block, merged into one geometry. */
+  _updateGrid() {
+    if (this.gridLines) {
+      this.scene.remove(this.gridLines);
+      this.gridLines.geometry.dispose();
+      this.gridLines.material.dispose();
+      this.gridLines = null;
+    }
+
+    const structure = appState.structure;
+    const range = appState.layerRange;
+    const base = this.edgesGeometry.attributes.position.array;
+    const keys = [];
+    for (const key of structure.blocks.keys()) {
+      if (range) {
+        const { z } = Structure.parseKey(key);
+        if (z < range.min || z > range.max) continue;
+      }
+      keys.push(key);
+    }
+    if (keys.length === 0) return;
+
+    const positions = new Float32Array(keys.length * base.length);
+    keys.forEach((key, i) => {
+      const { x, y, z } = Structure.parseKey(key);
+      const offset = i * base.length;
+      for (let v = 0; v < base.length; v += 3) {
+        positions[offset + v] = base[v] + x;
+        positions[offset + v + 1] = base[v + 1] + y;
+        positions[offset + v + 2] = base[v + 2] + z;
+      }
+    });
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 });
+    this.gridLines = new THREE.LineSegments(geometry, material);
+    this.gridLines.visible = this.showGrid;
+    this.scene.add(this.gridLines);
   }
 
   _animate() {

@@ -251,7 +251,10 @@ html, body {
   position: absolute;
   top: 108px;
   right: 12px;
-  padding: 3px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 5px 8px;
   background: rgba(22, 33, 62, 0.85);
   border: 1px solid var(--border);
   border-radius: 4px;
