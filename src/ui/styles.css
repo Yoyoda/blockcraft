@@ -79,6 +79,35 @@ html, body {
   background: var(--bg, #1e1e1e);
 }
 
+.toolbar-brand {
+  margin-left: auto;
+  gap: 14px;
+}
+
+.brand-name {
+  font-weight: 800;
+  font-size: 15px;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.brand-name .accent {
+  color: var(--accent);
+}
+
+.brand-github {
+  display: flex;
+  color: var(--text);
+  opacity: 0.8;
+  line-height: 0;
+}
+
+.brand-github:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
 #workspace {
   display: flex;
   flex: 1;
