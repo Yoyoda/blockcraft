@@ -34,6 +34,20 @@ export function rectCells(a, b, z) {
   return cells;
 }
 
+/** Filled disc on a single Z level; matches the widest section of a sphere of the same radius. */
+export function circleCells(center, radius, z) {
+  const r = Math.max(0, Math.round(radius));
+  const limit = (r + 0.5) * (r + 0.5);
+  const cells = [];
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (dx * dx + dy * dy > limit) continue;
+      cells.push({ x: center.x + dx, y: center.y + dy, z });
+    }
+  }
+  return cells;
+}
+
 /** Filled sphere centred on (x, y, z); its widest section lies on level z. */
 export function sphereCells(center, radius) {
   const r = Math.max(0, Math.round(radius));

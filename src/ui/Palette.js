@@ -4,6 +4,7 @@ const TOOL_BUTTONS = [
   { id: TOOLS.PENCIL, icon: '✏️', label: 'Pencil', hint: 'Paint cell by cell' },
   { id: TOOLS.LINE, icon: '╱', label: 'Line', hint: 'Drag between two cells of this layer' },
   { id: TOOLS.RECT, icon: '▭', label: 'Rectangle', hint: 'Drag to fill a rectangle on this layer' },
+  { id: TOOLS.CIRCLE, icon: '○', label: 'Circle', hint: 'Drag from the centre to fill a disc on this layer' },
   { id: TOOLS.SPHERE, icon: '⬤', label: 'Sphere', hint: 'Drag from the centre; widest section on this layer' },
 ];
 

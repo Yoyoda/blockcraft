@@ -1,5 +1,5 @@
 import { appState, TOOLS } from '../core/AppState.js';
-import { rectCells, sphereCells, lineCells, radiusBetween } from '../core/shapes.js';
+import { rectCells, sphereCells, lineCells, circleCells, radiusBetween } from '../core/shapes.js';
 
 /**
  * 2D layer editor rendered on a canvas.
@@ -133,6 +133,8 @@ export class EditorCanvas {
         const h = Math.abs(current.y - anchor.y) + 1;
         return `   ▭ ${w}×${h}`;
       }
+      case TOOLS.CIRCLE:
+        return `   ○ r ${radiusBetween(anchor, current)}`;
       default:
         return `   ⬤ r ${radiusBetween(anchor, current)}`;
     }
@@ -148,6 +150,8 @@ export class EditorCanvas {
         return lineCells(drag.anchor, drag.current, z);
       case TOOLS.RECT:
         return rectCells(drag.anchor, drag.current, z);
+      case TOOLS.CIRCLE:
+        return circleCells(drag.anchor, radiusBetween(drag.anchor, drag.current), z);
       default: {
         const center = { x: drag.anchor.x, y: drag.anchor.y, z };
         return sphereCells(center, radiusBetween(drag.anchor, drag.current)).filter(c => c.z === z);
@@ -166,6 +170,9 @@ export class EditorCanvas {
         break;
       case TOOLS.RECT:
         appState.drawRect(anchor, current, { erase });
+        break;
+      case TOOLS.CIRCLE:
+        appState.drawCircle(anchor, radiusBetween(anchor, current), { erase });
         break;
       default:
         appState.drawSphere(anchor, radiusBetween(anchor, current), { erase });

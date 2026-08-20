@@ -1,13 +1,14 @@
 import { Structure } from './Structure.js';
 import { defaultLibrary } from '../library/BlockLibrary.js';
 import { HistoryManager, SetBlockCommand, BatchBlockCommand } from './HistoryManager.js';
-import { rectCells, sphereCells, lineCells } from './shapes.js';
+import { rectCells, sphereCells, lineCells, circleCells } from './shapes.js';
 
 /** Drawing tools. A tool decides *how* cells are picked; the material decides *what* is placed. */
 export const TOOLS = {
   PENCIL: 'pencil',
   LINE: 'line',
   RECT: 'rect',
+  CIRCLE: 'circle',
   SPHERE: 'sphere',
 };
 
@@ -80,6 +81,11 @@ class AppState {
   /** Fill the rectangle spanning corners a and b on the current layer. */
   drawRect(a, b, { erase = false } = {}) {
     this.applyShape(rectCells(a, b, this.currentLayer), { erase });
+  }
+
+  /** Fill a disc centred on the current layer. */
+  drawCircle(center, radius, { erase = false } = {}) {
+    this.applyShape(circleCells(center, radius, this.currentLayer), { erase });
   }
 
   /** Build a sphere whose widest section sits on the current layer. */
