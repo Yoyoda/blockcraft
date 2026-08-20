@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180">
+  <rect width="640" height="180" rx="20" fill="#1a1a2e"/>
+
+  <!-- Grass block icon -->
+  <g>
+    <polygon points="80,33 129,59 80,85 31,59" fill="#6FA83A" stroke="#00000030" stroke-width="0.75" stroke-linejoin="round"/>
+    <polygon points="31,59 80,85 80,138 31,111" fill="#5A3B22" stroke="#00000030" stroke-width="0.75" stroke-linejoin="round"/>
+    <polygon points="129,59 80,85 80,138 129,111" fill="#8B5E3C" stroke="#00000030" stroke-width="0.75" stroke-linejoin="round"/>
+    <polygon points="31,59 80,85 80,96 31,70" fill="#4A7228"/>
+    <polygon points="129,59 80,85 80,96 129,70" fill="#6FA83A"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="175" y="98" font-family="'Segoe UI', Verdana, sans-serif" font-size="54" font-weight="800" letter-spacing="1">
+    <tspan fill="#e0e0e0">Block</tspan><tspan fill="#e94560">craft</tspan>
+  </text>
+  <text x="177" y="128" font-family="'Segoe UI', Verdana, sans-serif" font-size="18" fill="#8b8bab">
+    Design Minecraft builds, block by block.
+  </text>
+</svg>
